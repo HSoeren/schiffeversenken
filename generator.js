@@ -139,7 +139,7 @@ function erstelleSpielfeld() {
 
     spielfeld.appendChild(svg);
 
-    platziereLogo(svg, LOGOGROESSE);
+    platziereLogo(svg);
 }
 
 // Schiffe zufällig platzieren
@@ -237,15 +237,15 @@ function pruefeKollisionen(belegteFelder) {
 }
 
 // Platzierung des Logos vom Sportverein
-function platziereLogo(svg, logoGroesse) {
+function platziereLogo(svg) {
     const logoUrl = '/assets/logo.svg';
 
     // Funktion zum Erstellen und Platzieren eines Logos
     function maleLogo(x, y) {
         const logo = document.createElementNS('http://www.w3.org/2000/svg', 'image');
         logo.setAttributeNS('http://www.w3.org/1999/xlink', 'href', logoUrl);
-        logo.setAttribute('width', logoGroesse);
-        logo.setAttribute('height', logoGroesse);
+        logo.setAttribute('width', LOGOGROESSE);
+        logo.setAttribute('height', LOGOGROESSE);
         logo.setAttribute('x', x);
         logo.setAttribute('y', y);
         svg.appendChild(logo);
@@ -255,7 +255,7 @@ function platziereLogo(svg, logoGroesse) {
     maleLogo(RANDBREITE * 0.2, RANDBREITE * 0.2);
 
     // Platziere Logo in der unteren rechten Ecke
-    maleLogo(GESAMTGROESSE - RANDBREITE * 0.2 - logoGroesse, GESAMTGROESSE - RANDBREITE * 0.2 - logoGroesse);
+    maleLogo(GESAMTGROESSE - RANDBREITE * 0.2 - LOGOGROESSE, GESAMTGROESSE - RANDBREITE * 0.2 - LOGOGROESSE);
 }
 
 window.onload = erstelleSpielfeld;
