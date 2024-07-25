@@ -7,37 +7,44 @@ const SCHIFFE = [
     { 
         name: 'Flugzeug', 
         groesse: 1, 
-        svg: '/schiffe/Flugzeug.svg'
+        farbe: 'red',
+        image: '/schiffe/Flugzeug.svg'
     },
     { 
         name: 'Helikopter', 
         groesse: 1, 
-        svg: '/schiffe/Helikopter.svg'
+        farbe: 'lightblue',
+        image: '/schiffe/Helikopter.svg'
     },
     { 
         name: 'Schnellboot', 
         groesse: 1, 
-        svg: '/schiffe/Schnellboot.svg'
+        farbe: 'darkblue',
+        image: '/schiffe/Schnellboot.svg'
     },
     { 
         name: 'Kreuzer', 
         groesse: 2, 
-        svg: '/schiffe/Kreuzer.svg'
+        farbe: 'green',
+        image: '/schiffe/Kreuzer.svg'
     },
     {
         name: 'U-Boot',
         groesse: 3,
-        svg: '/schiffe/U-Boot.svg'
+        farbe: 'yellow',
+        image: '/schiffe/U-Boot.svg'
     },
     {
         name: 'Zerstörer',
         groesse: 4,
-        svg: '/schiffe/Zerstoerer.svg'
+        farbe: 'orange',
+        image: '/schiffe/Zerstoerer.svg'
     },
     {
         name: 'Flugzeugträger',
         groesse: 5,
-        svg: '/schiffe/Flugzeugtraeger.svg'
+        farbe: 'purple',
+        image: '/schiffe/Flugzeugtraeger.svg'
     }
 ];
 
@@ -126,8 +133,58 @@ function erstelleSpielfeld() {
         svg.appendChild(buchstabe);
     }
 
+    platziereSchiffe(svg);
 
     spielfeld.appendChild(svg);
 }
+
+// Schiffe zufällig platzieren
+function platziereSchiffe(svg) {
+    const belegteFelder = new Set();
+    
+    // für jedes Schiff in der Liste SCHIFFE wird eine zufällige Koordinate ermittelt
+    // dann geprüft, ob das Schiff dort platziert werden kann, wenn ja, wird ein farbiges Rechteck gezeichnet
+    SCHIFFE.forEach(schiff => {
+        let platziert = false;
+        while (!platziert) {
+            const x = Math.floor(Math.random() * FELDGROESSE);
+            const y = Math.floor(Math.random() * FELDGROESSE);
+            
+            if (kannPlatzieren(x, y, schiff.groesse, belegteFelder)) {
+                const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                schiffBox.setAttribute('x', RANDBREITE + x * ZELLGROESSE);
+                schiffBox.setAttribute('y', RANDBREITE + y * ZELLGROESSE);
+                schiffBox.setAttribute('width', ZELLGROESSE);
+                schiffBox.setAttribute('height', ZELLGROESSE);
+                schiffBox.setAttribute('fill', schiff.farbe);
+                svg.appendChild(schiffBox);
+                
+                belegteFelder.add(`${x},${y}`);
+                platziert = true;
+            }
+        }
+    });
+
+    // Kontrollausgabe in die Konsole
+    console.log(belegteFelder);
+}
+
+// Funktion zur Überprüfung, ob ein Schiff an einer bestimmten Position platziert werden kann
+// Regel: 1 Feld Platz drumherum
+function kannPlatzieren(x, y, groesse, belegteFelder) {
+    for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+            const checkX = x + dx;
+            const checkY = y + dy;
+            if (checkX >= 0 && checkX < FELDGROESSE && checkY >= 0 && checkY < FELDGROESSE) {
+                if (belegteFelder.has(`${checkX},${checkY}`)) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 
 window.onload = erstelleSpielfeld;
