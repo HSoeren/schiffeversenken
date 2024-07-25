@@ -1,7 +1,8 @@
 const FELDGROESSE = 10;
 const ZELLGROESSE = 70; // 700 // 70 mm * 10 Pixel/mm
 const RANDBREITE = ZELLGROESSE / 2; // 350 Pixel
-const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel
+const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel = 800 mm = 80 cm 
+// irgendwas stimmt hier nicht, das Feld ist irgendwie 7700x7700 Pixel groß
 
 const LOGOGROESSE = RANDBREITE * 0.7; // 80% der Randbreite
 const SCHIFFZEICHNER = 'Lars Lars Herud, Sören Helms, Andrea Helms';    // Name der Illustratoren
@@ -13,43 +14,43 @@ const SCHIFFE = [
         name: 'Flugzeug', 
         groesse: 1, 
         farbe: 'red',
-        image: '/schiffe/Flugzeug.svg'
+        image: 'schiffe/Flugzeug.svg'
     },
     { 
         name: 'Helikopter', 
         groesse: 1, 
         farbe: 'lightblue',
-        image: '/schiffe/Helikopter.svg'
+        image: 'schiffe/Helikopter.svg'
     },
     { 
         name: 'Schnellboot', 
         groesse: 1, 
         farbe: 'darkblue',
-        image: '/schiffe/Schnellboot.svg'
+        image: 'schiffe/Schnellboot.svg'
     },
     { 
         name: 'Kreuzer', 
         groesse: 2, 
         farbe: 'green',
-        image: '/schiffe/Kreuzer.svg'
+        image: 'schiffe/Kreuzer.svg'
     },
     {
         name: 'U-Boot',
         groesse: 3,
         farbe: 'yellow',
-        image: '/schiffe/U-Boot.svg'
+        image: 'schiffe/U-Boot.svg'
     },
     {
         name: 'Zerstörer',
         groesse: 4,
         farbe: 'orange',
-        image: '/schiffe/Zerstoerer.svg'
+        image: 'schiffe/Zerstoerer.svg'
     },
     {
         name: 'Flugzeugträger',
         groesse: 5,
         farbe: 'purple',
-        image: '/schiffe/Flugzeugtraeger.svg'
+        image: 'schiffe/Flugzeugtraeger.svg'
     }
 ];
 
@@ -202,15 +203,6 @@ function platziereSchiffe(svg) {
                     for (let i = 0; i < schiff.groesse; i++) {
                         const schiffX = horizontal ? x + i : x;
                         const schiffY = horizontal ? y : y + i;
-                        
-                        const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                        schiffBox.setAttribute('x', RANDBREITE + schiffX * ZELLGROESSE);
-                        schiffBox.setAttribute('y', RANDBREITE + schiffY * ZELLGROESSE);
-                        schiffBox.setAttribute('width', ZELLGROESSE);
-                        schiffBox.setAttribute('height', ZELLGROESSE);
-                        schiffBox.setAttribute('fill', schiff.farbe);
-                        schiffeGruppe.appendChild(schiffBox);
-                        
                         belegteFelder.add(`${schiff.name}: ${schiffX},${schiffY}`);
                     }
                     platziert = true;
@@ -273,7 +265,7 @@ function pruefeKollisionen(belegteFelder) {
 
 // Platzierung des Logos vom Sportverein
 function platziereLogo(svg) {
-    const logoUrl = '/assets/logo.svg';
+    const logoUrl = 'assets/logo.svg';
 
     // Funktion zum Erstellen und Platzieren eines Logos
     function maleLogo(x, y) {
