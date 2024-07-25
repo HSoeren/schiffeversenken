@@ -14,43 +14,50 @@ const SCHIFFE = [
         name: 'Flugzeug', 
         groesse: 1, 
         farbe: 'red',
-        image: 'schiffe/Flugzeug.svg'
+        image: 'schiffe/Flugzeug.svg',
+        imageHor: 'schiffe/Flugzeug.svg'    // gibt nur eine Orientierung
     },
     { 
         name: 'Helikopter', 
         groesse: 1, 
         farbe: 'lightblue',
-        image: 'schiffe/Helikopter.svg'
+        image: 'schiffe/Helikopter.svg',
+        imageHor: 'schiffe/Helikopter.svg'    // gibt nur eine Orientierung
     },
     { 
         name: 'Schnellboot', 
         groesse: 1, 
         farbe: 'darkblue',
-        image: 'schiffe/Schnellboot.svg'
+        image: 'schiffe/Schnellboot.svg',
+        imageHor: 'schiffe/Schnellboot.svg'    // gibt nur eine Orientierung
     },
     { 
         name: 'Kreuzer', 
         groesse: 2, 
         farbe: 'green',
-        image: 'schiffe/Kreuzer.svg'
+        image: 'schiffe/Kreuzer.svg',
+        imageHor: 'schiffe/Kreuzer-hor.svg'
     },
     {
         name: 'U-Boot',
         groesse: 3,
         farbe: 'yellow',
-        image: 'schiffe/U-Boot.svg'
+        image: 'schiffe/U-Boot.svg',
+        imageHor: 'schiffe/U-Boot-hor.svg'
     },
     {
         name: 'Zerstörer',
         groesse: 4,
         farbe: 'orange',
-        image: 'schiffe/Zerstoerer.svg'
+        image: 'schiffe/Zerstoerer.svg',
+        imageHor: 'schiffe/Zerstoerer-hor.svg'
     },
     {
         name: 'Flugzeugträger',
         groesse: 5,
         farbe: 'purple',
-        image: 'schiffe/Flugzeugtraeger.svg'
+        image: 'schiffe/Flugzeugtraeger.svg',
+        imageHor: 'schiffe/Flugzeugtraeger-hor.svg'
     }
 ];
 
@@ -186,16 +193,18 @@ function platziereSchiffe(svg) {
 
                     // Füge das Schiff-Bild hinzu
                     const schiffImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-                    schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.image);
+                    // Drehen von SVGs ist eine Gesschichte, das finden des Ankerpunktes auch nicht trivial
+                    // daher wird je nach Ausrichtung einfach das passende SVG geladen.
+                    if (horizontal) {
+                        schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.imageHor);
+                    } else {
+                        schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.image);
+                    }
+
+                    // SVG wird auf 100% der Boxgröße skaliert, sonst wird das Bild nicht korrket dargestellt
                     schiffImage.setAttribute('width', '100%');
                     schiffImage.setAttribute('height', '100%');
                     schiffBox.appendChild(schiffImage);
-
-                    // Drehung, wenn horizontal platziert
-                    if (horizontal) {
-                        schiffBox.setAttribute('transform', 'rotate(90 ' + (schiffBreite / 2) + ' ' + (schiffHöhe / 2) + ')');
-                        // console.log(schiff.name + ' gedreht'); // nicht hilfreich innerhalb der While-Schleife
-                    }
 
                     schiffeGruppe.appendChild(schiffBox);
                     
