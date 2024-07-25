@@ -3,3 +3,6 @@
 
 # font files due to licensing
 *.ttf
+
+# exported docker images
+*.tar
