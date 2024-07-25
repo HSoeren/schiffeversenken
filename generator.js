@@ -5,6 +5,7 @@ const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel
 
 const LOGOGROESSE = RANDBREITE * 0.7; // 80% der Randbreite
 const SCHIFFZEICHNER = 'Lars Lars Herud, Sören Helms, Andrea Helms';    // Name der Illustratoren
+const SCHEIBENBEZEICHNUNG = 'Bogenschießen Schiffe versenken';          // Name der Scheibe
 
 const SCHIFFE = [
     { 
@@ -143,6 +144,8 @@ function erstelleSpielfeld() {
     platziereLogo(svg);
 
     platziereCredits(svg);
+
+    platziereBezeichnung(svg);
 }
 
 // Schiffe zufällig platzieren
@@ -277,6 +280,22 @@ function platziereCredits(svg) {
     credits.textContent = creditsText;
 
     svg.appendChild(credits);
+}
+
+// Platzierung der Scheibenbezeichnung am unteren Rand
+function platziereBezeichnung(svg) {
+    const bezeichnung = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    const abmessung = GESAMTGROESSE / 10;
+
+    bezeichnung.setAttribute('x', RANDBREITE);
+    bezeichnung.setAttribute('y', GESAMTGROESSE - RANDBREITE / 3);
+    bezeichnung.setAttribute('font-size', ZELLGROESSE / 5); 
+    bezeichnung.setAttribute('font-family', 'Calibri, sans-serif');
+    bezeichnung.setAttribute('font-weight', 'bold');
+    bezeichnung.setAttribute('text-anchor', 'start');
+    bezeichnung.textContent = `${SCHEIBENBEZEICHNUNG} (${abmessung} x ${abmessung} cm)`;
+
+    svg.appendChild(bezeichnung);
 }
 
 window.onload = erstelleSpielfeld;
