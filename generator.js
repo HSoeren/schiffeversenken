@@ -140,48 +140,50 @@ function erstelleSpielfeld() {
 
 // Schiffe zufällig platzieren
 function platziereSchiffe(svg) {
-    const belegteFelder = new Set();
-    
-    // für jedes Schiff in der Liste SCHIFFE wird eine zufällige Koordinate ermittelt
-    // dann geprüft, ob das Schiff dort platziert werden kann, wenn ja, wird ein farbiges Rechteck gezeichnet
-    SCHIFFE.forEach(schiff => {
-        let platziert = false;
-        while (!platziert) {
-            const x = Math.floor(Math.random() * FELDGROESSE);
-            const y = Math.floor(Math.random() * FELDGROESSE);
-            const horizontal = Math.random() < 0.5; // zufällige Ausrichtung
-            
-            if (kannPlatzieren(x, y, schiff.groesse, horizontal, belegteFelder)) {
-                for (let i = 0; i < schiff.groesse; i++) {
-                    const schiffN = schiff.name;
-                    const schiffX = horizontal ? x + i : x;
-                    const schiffY = horizontal ? y : y + i;
-                    
-                    const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    schiffBox.setAttribute('x', RANDBREITE + schiffX * ZELLGROESSE);
-                    schiffBox.setAttribute('y', RANDBREITE + schiffY * ZELLGROESSE);
-                    schiffBox.setAttribute('width', ZELLGROESSE);
-                    schiffBox.setAttribute('height', ZELLGROESSE);
-                    schiffBox.setAttribute('fill', schiff.farbe);
-                    svg.appendChild(schiffBox);
-                    
-                    belegteFelder.add(`${schiffN}: ${schiffX},${schiffY}`);
+    let belegteFelder;          // const kann nicht verwendet werden, da belegteFelder neu gesetzt wird
+    let platzierungErfolgreich = false;
+    const schiffeGruppe = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    svg.appendChild(schiffeGruppe);
+
+    // Schiffe platzieren, bis keine Kollisionen mehr vorhanden sind
+    while (!platzierungErfolgreich) {
+        belegteFelder = new Set();
+        schiffeGruppe.innerHTML = ''; // Nur die Schiffe löschen, nicht das Spielfeld
+
+        // für jedes Schiff in der Liste SCHIFFE wird eine zufällige Koordinate ermittelt
+        // dann geprüft, ob das Schiff dort platziert werden kann, wenn ja, wird ein farbiges Rechteck gezeichnet
+        SCHIFFE.forEach(schiff => {
+            let platziert = false;
+            while (!platziert) {
+                const x = Math.floor(Math.random() * FELDGROESSE);
+                const y = Math.floor(Math.random() * FELDGROESSE);
+                const horizontal = Math.random() < 0.5; // zufällige Ausrichtung
+                
+                if (kannPlatzieren(x, y, schiff.groesse, horizontal, belegteFelder)) {
+                    for (let i = 0; i < schiff.groesse; i++) {
+                        const schiffX = horizontal ? x + i : x;
+                        const schiffY = horizontal ? y : y + i;
+                        
+                        const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        schiffBox.setAttribute('x', RANDBREITE + schiffX * ZELLGROESSE);
+                        schiffBox.setAttribute('y', RANDBREITE + schiffY * ZELLGROESSE);
+                        schiffBox.setAttribute('width', ZELLGROESSE);
+                        schiffBox.setAttribute('height', ZELLGROESSE);
+                        schiffBox.setAttribute('fill', schiff.farbe);
+                        schiffeGruppe.appendChild(schiffBox);
+                        
+                        belegteFelder.add(`${schiff.name}: ${schiffX},${schiffY}`);
+                    }
+                    platziert = true;
                 }
-                platziert = true;
             }
-        }
-    });
+        });
 
-    // Kontrollausgabe in die Konsole
+        // Beenden der While-Schleife, wenn keine Kollisionen gefunden wurden
+        platzierungErfolgreich = !pruefeKollisionen(belegteFelder);
+    }
+
     console.log(belegteFelder);
-
-    // Überprüfung auf Kollisionen
-    if (pruefeKollisionen(belegteFelder)) {
-        console.log('Kollisionen gefunden!');
-    }
-    else {
-        console.log('Keine Kollisionen gefunden!');
-    }
 }
 
 // Funktion zur Überprüfung, ob ein Schiff an einer bestimmten Position platziert werden kann
