@@ -6,6 +6,7 @@ const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel
 const LOGOGROESSE = RANDBREITE * 0.7; // 80% der Randbreite
 const SCHIFFZEICHNER = 'Lars Lars Herud, Sören Helms, Andrea Helms';    // Name der Illustratoren
 const SCHEIBENBEZEICHNUNG = 'Bogenschießen Schiffe versenken';          // Name der Scheibe
+const VEREINSNAME = 'Schützenverein Rahlstedt u. Umg. v. 1906 e.V.';    // Name des Vereins
 
 const SCHIFFE = [
     { 
@@ -146,6 +147,8 @@ function erstelleSpielfeld() {
     platziereCredits(svg);
 
     platziereBezeichnung(svg);
+
+    platziereVerein(svg);
 }
 
 // Schiffe zufällig platzieren
@@ -296,6 +299,21 @@ function platziereBezeichnung(svg) {
     bezeichnung.textContent = `${SCHEIBENBEZEICHNUNG} (${abmessung} x ${abmessung} cm)`;
 
     svg.appendChild(bezeichnung);
+}
+
+// Platzierung des Vereinsnamens am unteren Rand
+function platziereVerein(svg) {
+    const verein = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    
+    verein.setAttribute('x', GESAMTGROESSE - RANDBREITE);
+    verein.setAttribute('y', GESAMTGROESSE - RANDBREITE / 3);
+    verein.setAttribute('font-size', ZELLGROESSE / 5);
+    verein.setAttribute('font-family', 'Calibri, sans-serif');
+    verein.setAttribute('font-weight', 'normal');
+    verein.setAttribute('text-anchor', 'end');
+    verein.textContent = VEREINSNAME;
+
+    svg.appendChild(verein);
 }
 
 window.onload = erstelleSpielfeld;
