@@ -173,6 +173,32 @@ function platziereSchiffe(svg) {
                 const horizontal = Math.random() < 0.5; // zufällige Ausrichtung
                 
                 if (kannPlatzieren(x, y, schiff.groesse, horizontal, belegteFelder)) {
+                    // 1 SVG statt n SVG pro Schiff
+                    const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    const schiffBreite = horizontal ? ZELLGROESSE * schiff.groesse : ZELLGROESSE;
+                    const schiffHöhe = horizontal ? ZELLGROESSE : ZELLGROESSE * schiff.groesse;
+
+                    schiffBox.setAttribute('x', RANDBREITE + (horizontal ? x * ZELLGROESSE : x * ZELLGROESSE - (schiffBreite - ZELLGROESSE) / 2));
+                    schiffBox.setAttribute('y', RANDBREITE + (horizontal ? y * ZELLGROESSE - (schiffHöhe - ZELLGROESSE) / 2 : y * ZELLGROESSE));
+                    schiffBox.setAttribute('width', schiffBreite);
+                    schiffBox.setAttribute('height', schiffHöhe);
+
+                    // Füge das Schiff-Bild hinzu
+                    const schiffImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+                    schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.image);
+                    schiffImage.setAttribute('width', '100%');
+                    schiffImage.setAttribute('height', '100%');
+                    schiffBox.appendChild(schiffImage);
+
+                    // Drehung, wenn horizontal platziert
+                    if (horizontal) {
+                        schiffBox.setAttribute('transform', 'rotate(90 ' + (schiffBreite / 2) + ' ' + (schiffHöhe / 2) + ')');
+                        // console.log(schiff.name + ' gedreht'); // nicht hilfreich innerhalb der While-Schleife
+                    }
+
+                    schiffeGruppe.appendChild(schiffBox);
+                    
+                    // Markiere die Felder als belegt
                     for (let i = 0; i < schiff.groesse; i++) {
                         const schiffX = horizontal ? x + i : x;
                         const schiffY = horizontal ? y : y + i;
