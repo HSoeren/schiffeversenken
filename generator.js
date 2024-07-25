@@ -149,17 +149,24 @@ function platziereSchiffe(svg) {
         while (!platziert) {
             const x = Math.floor(Math.random() * FELDGROESSE);
             const y = Math.floor(Math.random() * FELDGROESSE);
+            const horizontal = Math.random() < 0.5; // zufällige Ausrichtung
             
-            if (kannPlatzieren(x, y, schiff.groesse, belegteFelder)) {
-                const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                schiffBox.setAttribute('x', RANDBREITE + x * ZELLGROESSE);
-                schiffBox.setAttribute('y', RANDBREITE + y * ZELLGROESSE);
-                schiffBox.setAttribute('width', ZELLGROESSE);
-                schiffBox.setAttribute('height', ZELLGROESSE);
-                schiffBox.setAttribute('fill', schiff.farbe);
-                svg.appendChild(schiffBox);
-                
-                belegteFelder.add(`${x},${y}`);
+            if (kannPlatzieren(x, y, schiff.groesse, horizontal, belegteFelder)) {
+                for (let i = 0; i < schiff.groesse; i++) {
+                    const schiffN = schiff.name;
+                    const schiffX = horizontal ? x + i : x;
+                    const schiffY = horizontal ? y : y + i;
+                    
+                    const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                    schiffBox.setAttribute('x', RANDBREITE + schiffX * ZELLGROESSE);
+                    schiffBox.setAttribute('y', RANDBREITE + schiffY * ZELLGROESSE);
+                    schiffBox.setAttribute('width', ZELLGROESSE);
+                    schiffBox.setAttribute('height', ZELLGROESSE);
+                    schiffBox.setAttribute('fill', schiff.farbe);
+                    svg.appendChild(schiffBox);
+                    
+                    belegteFelder.add(`${schiffN}: ${schiffX},${schiffY}`);
+                }
                 platziert = true;
             }
         }
@@ -171,20 +178,28 @@ function platziereSchiffe(svg) {
 
 // Funktion zur Überprüfung, ob ein Schiff an einer bestimmten Position platziert werden kann
 // Regel: 1 Feld Platz drumherum
-function kannPlatzieren(x, y, groesse, belegteFelder) {
-    for (let dx = -1; dx <= 1; dx++) {
-        for (let dy = -1; dy <= 1; dy++) {
-            const checkX = x + dx;
-            const checkY = y + dy;
-            if (checkX >= 0 && checkX < FELDGROESSE && checkY >= 0 && checkY < FELDGROESSE) {
-                if (belegteFelder.has(`${checkX},${checkY}`)) {
-                    return false;
+function kannPlatzieren(x, y, groesse, horizontal, belegteFelder) {
+    for (let i = 0; i < groesse; i++) {
+        const schiffX = horizontal ? x + i : x;
+        const schiffY = horizontal ? y : y + i;
+        
+        if (schiffX >= FELDGROESSE || schiffY >= FELDGROESSE) {
+            return false;
+        }
+        
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const checkX = schiffX + dx;
+                const checkY = schiffY + dy;
+                if (checkX >= 0 && checkX < FELDGROESSE && checkY >= 0 && checkY < FELDGROESSE) {
+                    if (belegteFelder.has(`${checkX},${checkY}`)) {
+                        return false;
+                    }
                 }
             }
         }
     }
     return true;
 }
-
 
 window.onload = erstelleSpielfeld;
