@@ -174,6 +174,14 @@ function platziereSchiffe(svg) {
 
     // Kontrollausgabe in die Konsole
     console.log(belegteFelder);
+
+    // Überprüfung auf Kollisionen
+    if (pruefeKollisionen(belegteFelder)) {
+        console.log('Kollisionen gefunden!');
+    }
+    else {
+        console.log('Keine Kollisionen gefunden!');
+    }
 }
 
 // Funktion zur Überprüfung, ob ein Schiff an einer bestimmten Position platziert werden kann
@@ -200,6 +208,26 @@ function kannPlatzieren(x, y, groesse, horizontal, belegteFelder) {
         }
     }
     return true;
+}
+
+// Funktion zur Überprüfung von Kollisionen nach der Platzierung
+// Alle Felder werden in ein Array umgewandelt und paarweise auf Kollisionen geprüft
+function pruefeKollisionen(belegteFelder) {
+    const felderArray = Array.from(belegteFelder);
+    for (let i = 0; i < felderArray.length; i++) {
+        const [schiff1, koordinaten1] = felderArray[i].split(': ');
+        const [x1, y1] = koordinaten1.split(',').map(Number);
+        
+        for (let j = i + 1; j < felderArray.length; j++) {
+            const [schiff2, koordinaten2] = felderArray[j].split(': ');
+            const [x2, y2] = koordinaten2.split(',').map(Number);
+            
+            if (schiff1 !== schiff2 && Math.abs(x1 - x2) <= 1 && Math.abs(y1 - y2) <= 1) {
+                return true; // Kollision gefunden
+            }
+        }
+    }
+    return false; // Keine Kollisionen
 }
 
 window.onload = erstelleSpielfeld;
