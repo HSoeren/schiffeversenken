@@ -62,6 +62,71 @@ function erstelleSpielfeld() {
     rand.setAttribute('stroke-width', '2');
     svg.appendChild(rand);
 
+    // Schachbrettmuster & Koordinatengröße
+    const linienStaerke = 0.5; 
+    const fontSkalierung = 1.6; // 2 empfohlen
+
+    // Hintergrund (alle Felder weiß)
+    const hintergrund = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    hintergrund.setAttribute('x', RANDBREITE);
+    hintergrund.setAttribute('y', RANDBREITE);
+    hintergrund.setAttribute('width', FELDGROESSE * ZELLGROESSE);
+    hintergrund.setAttribute('height', FELDGROESSE * ZELLGROESSE);
+    hintergrund.setAttribute('fill', 'white');  //'fill', (i + j) % 2 === 0 ? '#eee' : '#ddd');
+    svg.appendChild(hintergrund);               // für abwechselndes Muster
+
+    // Vertikale Linien
+    for (let i = 0; i <= FELDGROESSE; i++) {
+        const linie = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        linie.setAttribute('x1', RANDBREITE + i * ZELLGROESSE);
+        linie.setAttribute('y1', RANDBREITE);
+        linie.setAttribute('x2', RANDBREITE + i * ZELLGROESSE);
+        linie.setAttribute('y2', RANDBREITE + FELDGROESSE * ZELLGROESSE);
+        linie.setAttribute('stroke', 'black');
+        linie.setAttribute('stroke-width', linienStaerke);
+        svg.appendChild(linie);
+    }
+
+    // Horizontale Linien
+    for (let j = 0; j <= FELDGROESSE; j++) {
+        const linie = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        linie.setAttribute('x1', RANDBREITE);
+        linie.setAttribute('y1', RANDBREITE + j * ZELLGROESSE);
+        linie.setAttribute('x2', RANDBREITE + FELDGROESSE * ZELLGROESSE);
+        linie.setAttribute('y2', RANDBREITE + j * ZELLGROESSE);
+        linie.setAttribute('stroke', 'black');
+        linie.setAttribute('stroke-width', linienStaerke);
+        svg.appendChild(linie);
+    }
+
+    // Koordinaten hinzufügen
+    for (let i = 0; i < FELDGROESSE; i++) {
+        // Zahlen (1-10) oberhalb des Schachbretts
+        const zahl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        zahl.setAttribute('x', RANDBREITE + i * ZELLGROESSE + ZELLGROESSE / 2);
+        zahl.setAttribute('y', RANDBREITE / 2);
+        zahl.setAttribute('text-anchor', 'middle');
+        zahl.setAttribute('dominant-baseline', 'central');
+        zahl.setAttribute('font-family', 'Calibri, sans-serif');
+        zahl.setAttribute('font-weight', 'bold');
+        zahl.setAttribute('font-size', RANDBREITE / fontSkalierung);
+        zahl.textContent = i + 1;
+        svg.appendChild(zahl);
+        
+        // Buchstaben (A-J) links vom Schachbrett
+        const buchstabe = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        buchstabe.setAttribute('x', RANDBREITE / 2);
+        buchstabe.setAttribute('y', RANDBREITE + i * ZELLGROESSE + ZELLGROESSE / 2);
+        buchstabe.setAttribute('text-anchor', 'middle');
+        buchstabe.setAttribute('dominant-baseline', 'central');
+        buchstabe.setAttribute('font-family', 'Calibri, sans-serif');
+        buchstabe.setAttribute('font-weight', 'bold');
+        buchstabe.setAttribute('font-size', RANDBREITE / fontSkalierung);
+        buchstabe.textContent = String.fromCharCode(65 + i);
+        svg.appendChild(buchstabe);
+    }
+
+
     spielfeld.appendChild(svg);
 }
 
