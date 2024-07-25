@@ -9,10 +9,13 @@ const SCHIFFZEICHNER = 'Lars Lars Herud, Sören Helms, Andrea Helms';    // Name
 const SCHEIBENBEZEICHNUNG = 'Bogenschießen Schiffe versenken';          // Name der Scheibe
 const VEREINSNAME = 'Schützenverein Rahlstedt u. Umg. v. 1906 e.V.';    // Name des Vereins
 
+// Eine Breite größer 1 ist möglich, in diesem Fall wird aber aktuell keine korrekte
+// Kollisionsprüfung durchgeführt. Die Schiffe werden dann eventuell zu nah gesetzt.
 const SCHIFFE = [
     { 
         name: 'Flugzeug', 
         groesse: 1, 
+        breite: 1,
         farbe: 'red',
         image: 'schiffe/Flugzeug.svg',
         imageHor: 'schiffe/Flugzeug.svg'    // gibt nur eine Orientierung
@@ -20,6 +23,7 @@ const SCHIFFE = [
     { 
         name: 'Helikopter', 
         groesse: 1, 
+        breite: 1,
         farbe: 'lightblue',
         image: 'schiffe/Helikopter.svg',
         imageHor: 'schiffe/Helikopter.svg'    // gibt nur eine Orientierung
@@ -27,6 +31,7 @@ const SCHIFFE = [
     { 
         name: 'Schnellboot', 
         groesse: 1, 
+        breite: 1,
         farbe: 'darkblue',
         image: 'schiffe/Schnellboot.svg',
         imageHor: 'schiffe/Schnellboot.svg'    // gibt nur eine Orientierung
@@ -34,6 +39,7 @@ const SCHIFFE = [
     { 
         name: 'Kreuzer', 
         groesse: 2, 
+        breite: 1,
         farbe: 'green',
         image: 'schiffe/Kreuzer.svg',
         imageHor: 'schiffe/Kreuzer-hor.svg'
@@ -41,6 +47,7 @@ const SCHIFFE = [
     {
         name: 'U-Boot',
         groesse: 3,
+        breite: 1,
         farbe: 'yellow',
         image: 'schiffe/U-Boot.svg',
         imageHor: 'schiffe/U-Boot-hor.svg'
@@ -48,6 +55,7 @@ const SCHIFFE = [
     {
         name: 'Zerstörer',
         groesse: 4,
+        breite: 1,
         farbe: 'orange',
         image: 'schiffe/Zerstoerer.svg',
         imageHor: 'schiffe/Zerstoerer-hor.svg'
@@ -55,6 +63,7 @@ const SCHIFFE = [
     {
         name: 'Flugzeugträger',
         groesse: 5,
+        breite: 2,
         farbe: 'purple',
         image: 'schiffe/Flugzeugtraeger.svg',
         imageHor: 'schiffe/Flugzeugtraeger-hor.svg'
@@ -183,11 +192,16 @@ function platziereSchiffe(svg) {
                 if (kannPlatzieren(x, y, schiff.groesse, horizontal, belegteFelder)) {
                     // 1 SVG statt n SVG pro Schiff
                     const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                    const schiffBreite = horizontal ? ZELLGROESSE * schiff.groesse : ZELLGROESSE;
-                    const schiffHöhe = horizontal ? ZELLGROESSE : ZELLGROESSE * schiff.groesse;
 
-                    schiffBox.setAttribute('x', RANDBREITE + (horizontal ? x * ZELLGROESSE : x * ZELLGROESSE - (schiffBreite - ZELLGROESSE) / 2));
-                    schiffBox.setAttribute('y', RANDBREITE + (horizontal ? y * ZELLGROESSE - (schiffHöhe - ZELLGROESSE) / 2 : y * ZELLGROESSE));
+                    // Berechne Breite und Höhe des Schiffes
+                    const schiffBreite = horizontal ? ZELLGROESSE * schiff.groesse : ZELLGROESSE * schiff.breite;
+                    const schiffHöhe = horizontal ? ZELLGROESSE * schiff.breite : ZELLGROESSE * schiff.groesse;
+
+                    // Berechne die Position der SVG-Box
+                    schiffBox.setAttribute('x', RANDBREITE + (horizontal ? x * ZELLGROESSE : x * ZELLGROESSE - (schiffBreite - ZELLGROESSE)));
+                    schiffBox.setAttribute('y', RANDBREITE + (horizontal ? y * ZELLGROESSE - (schiffHöhe - ZELLGROESSE) : y * ZELLGROESSE));
+
+                    // Setze die Breite und Höhe der Box
                     schiffBox.setAttribute('width', schiffBreite);
                     schiffBox.setAttribute('height', schiffHöhe);
 
