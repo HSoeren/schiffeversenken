@@ -2,4 +2,7 @@
 .DS_Store
 
 # font files due to licensing
-.ttf
+*.ttf
+
+# assets ordner
+assets/

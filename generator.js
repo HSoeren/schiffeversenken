@@ -3,6 +3,8 @@ const ZELLGROESSE = 70; // 700 // 70 mm * 10 Pixel/mm
 const RANDBREITE = ZELLGROESSE / 2; // 350 Pixel
 const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel
 
+const LOGOGROESSE = RANDBREITE * 0.7; // 80% der Randbreite
+
 const SCHIFFE = [
     { 
         name: 'Flugzeug', 
@@ -136,6 +138,8 @@ function erstelleSpielfeld() {
     platziereSchiffe(svg);
 
     spielfeld.appendChild(svg);
+
+    platziereLogo(svg, LOGOGROESSE);
 }
 
 // Schiffe zufällig platzieren
@@ -230,6 +234,28 @@ function pruefeKollisionen(belegteFelder) {
         }
     }
     return false; // Keine Kollisionen
+}
+
+// Platzierung des Logos vom Sportverein
+function platziereLogo(svg, logoGroesse) {
+    const logoUrl = '/assets/logo.svg';
+
+    // Funktion zum Erstellen und Platzieren eines Logos
+    function maleLogo(x, y) {
+        const logo = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        logo.setAttributeNS('http://www.w3.org/1999/xlink', 'href', logoUrl);
+        logo.setAttribute('width', logoGroesse);
+        logo.setAttribute('height', logoGroesse);
+        logo.setAttribute('x', x);
+        logo.setAttribute('y', y);
+        svg.appendChild(logo);
+    }
+
+    // Platziere Logo in der oberen linken Ecke
+    maleLogo(RANDBREITE * 0.2, RANDBREITE * 0.2);
+
+    // Platziere Logo in der unteren rechten Ecke
+    maleLogo(GESAMTGROESSE - RANDBREITE * 0.2 - logoGroesse, GESAMTGROESSE - RANDBREITE * 0.2 - logoGroesse);
 }
 
 window.onload = erstelleSpielfeld;
