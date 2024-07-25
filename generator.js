@@ -4,6 +4,7 @@ const RANDBREITE = ZELLGROESSE / 2; // 350 Pixel
 const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel
 
 const LOGOGROESSE = RANDBREITE * 0.7; // 80% der Randbreite
+const SCHIFFZEICHNER = 'Lars Lars Herud, Sören Helms, Andrea Helms';    // Name der Illustratoren
 
 const SCHIFFE = [
     { 
@@ -140,6 +141,8 @@ function erstelleSpielfeld() {
     spielfeld.appendChild(svg);
 
     platziereLogo(svg);
+
+    platziereCredits(svg);
 }
 
 // Schiffe zufällig platzieren
@@ -256,6 +259,24 @@ function platziereLogo(svg) {
 
     // Platziere Logo in der unteren rechten Ecke
     maleLogo(GESAMTGROESSE - RANDBREITE * 0.2 - LOGOGROESSE, GESAMTGROESSE - RANDBREITE * 0.2 - LOGOGROESSE);
+}
+
+// Platzierung der Credits am rechten Rand
+function platziereCredits(svg) {
+    const creditsText = 'Idee & Konzept: Lars Herud – Illustration: ' + SCHIFFZEICHNER + ' – Programmierung: Sören Helms';
+    const githubText = 'Quellcode auf GitHub: https://github.com/HSoeren/schiffeversenken';
+
+    const credits = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    credits.setAttribute('x', GESAMTGROESSE - RANDBREITE / 1.6);
+    credits.setAttribute('y', GESAMTGROESSE - RANDBREITE);
+    credits.setAttribute('font-size', ZELLGROESSE / 8);
+    credits.setAttribute('font-family', 'Calibri, sans-serif');
+    credits.setAttribute('font-weight', 'normal');
+    credits.setAttribute('text-anchor', 'start');
+    credits.setAttribute('transform', `rotate(270, ${GESAMTGROESSE - RANDBREITE / 1.6}, ${GESAMTGROESSE - RANDBREITE})`);
+    credits.textContent = creditsText;
+
+    svg.appendChild(credits);
 }
 
 window.onload = erstelleSpielfeld;
