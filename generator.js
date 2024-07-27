@@ -1,5 +1,9 @@
-const FELDGROESSE = 10;
-const ZELLGROESSE = 70; // 700 // 70 mm * 10 Pixel/mm
+const FELDGROESSE = 10;     // 10x10 Felder
+const urlParams = new URLSearchParams(window.location.search);
+// 70 ist die urspruengliche Groesse, erzeugt aber ein 7700x7700 Pixel großes Feld
+// Die Berechnung der Groesse muss noch einmal überarbeitet werden
+const ZELLGROESSE = parseInt(urlParams.get('groesse')) || 70; 
+// Falls nichts angegeben gehts auf default: 70 zurück
 const RANDBREITE = ZELLGROESSE / 2; // 350 Pixel
 const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel = 800 mm = 80 cm 
 // irgendwas stimmt hier nicht, das Feld ist irgendwie 7700x7700 Pixel groß

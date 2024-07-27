@@ -6,8 +6,28 @@
     <title>Schiffe Versenken Generator</title>
 </head>
 <body>
-    <div id="spielfeld">
-        <!-- <svg width="80cm" height="80cm" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"></svg> -->
+    <div class="container">
+        <main id="spielfeld">
+            <!-- <svg width="80cm" height="80cm" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"></svg> -->
+        </main>
+        <aside class="sidebar">
+            <h2>Bogenscheiben Generator</h2>
+            <p>Einfach so lange aktualisieren (F5) bis das Ergebnis gefällt!</p>
+            <div class="segmented-button">
+                <a href="?groesse=20" class="segment">20</a>
+                <a href="?groesse=40" class="segment">40</a>
+                <a href="?groesse=80" class="segment">80</a>
+            </div>
+            <br />
+            <button class="download-btn">Scheibe (PDF)</button>
+            <button class="download-btn">Spielplan (PDF)</button>
+            <br />
+            <button class="download-btn">Scheibe (SVG)</button>
+            <br />
+            <button class="download-btn">GitHub</button>
+            <br />
+            <button class="download-btn">Unser Verein</button>
+        </aside>
     </div>
     <script src="generator.js"></script>
     <!-- <script src="download.js"></script> -->
