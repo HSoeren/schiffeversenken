@@ -71,6 +71,13 @@ p {
 .download-btn:hover {
     background-color: #45a049;
 }
+a, a:visited, a:active, a:hover {
+    text-decoration: none;
+}
+#underline {
+    text-decoration: underline;
+    color: #1d1d1d;
+}
 
 /* Segmentierte Schaltfläche */
 .segmented-button {
