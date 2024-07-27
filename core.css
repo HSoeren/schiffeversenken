@@ -1,12 +1,12 @@
 @font-face {
     font-family: 'Calibri';
     font-weight: normal;
-    src: url('calibri-regular.ttf') format('truetype');
+    src: url('assets/calibri-regular.ttf') format('truetype');
 }
 @font-face {
     font-family: 'Calibri';
     font-weight: bold;
-    src: url('calibri-bold.ttf') format('truetype');
+    src: url('assets/calibri-bold.ttf') format('truetype');
 }
 
 html, body {
