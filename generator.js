@@ -277,10 +277,6 @@ async function placeRecursive(field, schiffeGruppe, debug, schiffe, rng) {
     }
     // Schiff plazieren
     schiffBox.setAttribute('transform', `translate(${px},${py}) rotate(${90 * rotation} ${ZELLGROESSE / 2} ${ZELLGROESSE / 2})`);
-    // schiffBox.setAttribute('x', px);
-    // schiffBox.setAttribute('y', py);
-    // schiffBox.setAttribute('transform', `rotate(${90 * rotation} ${ZELLGROESSE / 2} ${ZELLGROESSE / 2})`);
-
     const svg = await urlToSvg(schiff.image, schiffBreite, schiffHöhe);
     const modShipImage = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     if (schiff.modify) {
@@ -308,7 +304,6 @@ async function placeRecursive(field, schiffeGruppe, debug, schiffe, rng) {
     hitBox.setAttribute('width', (ZELLGROESSE * (width + 2)));
     hitBox.setAttribute('height', (ZELLGROESSE * (heigth + 2)));
     hitBox.setAttribute('transform', `translate(${ZELLGROESSE * (x - 1)},${ZELLGROESSE * (y - 1)})`);
-    // hitBox.setAttribute('fill', "red");
     hitBox.setAttribute("style", "fill:rgb(0,0,255);stroke-width:2;stroke:rgb(255,0,0);fill-opacity:0.1;stroke-opacity:0.9")
     debug.appendChild(hitBox);
     let wasOk = false;
@@ -505,10 +500,6 @@ async function erstellePlan() {
     planseed.setAttribute('transform', `scale(0.5,0.5) translate(650,120)`);
     var head = svg.getElementById('HEAD');
     head.appendChild(planseed);
-
-
-    //transform="matrix(4.16667,0,0,4.16667,0,0) translate(55,230)
-
     return svg;
 }
 
