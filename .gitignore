@@ -6,3 +6,4 @@
 
 # exported docker images
 *.tar
+node_modules

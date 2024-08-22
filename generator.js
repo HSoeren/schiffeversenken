@@ -2,7 +2,7 @@ const FELDGROESSE = 10;     // 10x10 Felder
 const urlParams = new URLSearchParams(window.location.search);
 // 70 ist die urspruengliche Groesse, erzeugt aber ein 7700x7700 Pixel großes Feld
 // Die Berechnung der Groesse muss noch einmal überarbeitet werden
-const ZELLGROESSE = parseInt(urlParams.get('groesse')) || 70; 
+const ZELLGROESSE = parseInt(urlParams.get('groesse')) || 70;
 // Falls nichts angegeben gehts auf default: 70 zurück
 const RANDBREITE = ZELLGROESSE / 2; // 350 Pixel
 const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel = 800 mm = 80 cm 
@@ -16,33 +16,33 @@ const VEREINSNAME = 'Schützenverein Rahlstedt u. Umg. v. 1906 e.V.';    // Name
 // Eine Breite größer 1 ist möglich, in diesem Fall wird aber aktuell keine korrekte
 // Kollisionsprüfung durchgeführt. Die Schiffe werden dann eventuell zu nah gesetzt.
 const SCHIFFE = [
-    { 
-        name: 'Flugzeug', 
-        groesse: 1, 
+    {
+        name: 'Flugzeug',
+        groesse: 1,
         breite: 1,
         farbe: 'red',
         image: 'schiffe/Flugzeug.svg',
         imageHor: 'schiffe/Flugzeug.svg'    // gibt nur eine Orientierung
     },
-    { 
-        name: 'Helikopter', 
-        groesse: 1, 
+    {
+        name: 'Helikopter',
+        groesse: 1,
         breite: 1,
         farbe: 'lightblue',
         image: 'schiffe/Helikopter.svg',
         imageHor: 'schiffe/Helikopter.svg'    // gibt nur eine Orientierung
     },
-    { 
-        name: 'Schnellboot', 
-        groesse: 1, 
+    {
+        name: 'Schnellboot',
+        groesse: 1,
         breite: 1,
         farbe: 'darkblue',
         image: 'schiffe/Schnellboot.svg',
         imageHor: 'schiffe/Schnellboot.svg'    // gibt nur eine Orientierung
     },
-    { 
-        name: 'Kreuzer', 
-        groesse: 2, 
+    {
+        name: 'Kreuzer',
+        groesse: 2,
         breite: 1,
         farbe: 'green',
         image: 'schiffe/Kreuzer.svg',
@@ -75,7 +75,7 @@ const SCHIFFE = [
 ];
 
 function erstelleSpielfeld() {
-    
+
     const spielfeld = document.getElementById('spielfeld');
     spielfeld.innerHTML = '';
 
@@ -96,7 +96,7 @@ function erstelleSpielfeld() {
     svg.appendChild(rand);
 
     // Schachbrettmuster & Koordinatengröße
-    const linienStaerke = 0.5; 
+    const linienStaerke = 0.5;
     const fontSkalierung = 1.6; // 2 empfohlen
 
     // Hintergrund (alle Felder weiß)
@@ -145,7 +145,7 @@ function erstelleSpielfeld() {
         zahl.setAttribute('font-size', RANDBREITE / fontSkalierung);
         zahl.textContent = i + 1;
         svg.appendChild(zahl);
-        
+
         // Buchstaben (A-J) links vom Schachbrett
         const buchstabe = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         buchstabe.setAttribute('x', RANDBREITE / 2);
@@ -186,13 +186,13 @@ function platziereSchiffe(svg) {
 
         // für jedes Schiff in der Liste SCHIFFE wird eine zufällige Koordinate ermittelt
         // dann geprüft, ob das Schiff dort platziert werden kann, wenn ja, wird ein farbiges Rechteck gezeichnet
-        SCHIFFE.forEach(schiff => {
+        SCHIFFE.forEach(async schiff => {
             let platziert = false;
             while (!platziert) {
                 const x = Math.floor(Math.random() * FELDGROESSE);
                 const y = Math.floor(Math.random() * FELDGROESSE);
                 const horizontal = Math.random() < 0.5; // zufällige Ausrichtung
-                
+
                 if (kannPlatzieren(x, y, schiff.groesse, horizontal, belegteFelder)) {
                     // 1 SVG statt n SVG pro Schiff
                     const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -210,22 +210,25 @@ function platziereSchiffe(svg) {
                     schiffBox.setAttribute('height', schiffHöhe);
 
                     // Füge das Schiff-Bild hinzu
-                    const schiffImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+                    // const schiffImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
                     // Drehen von SVGs ist eine Gesschichte, das finden des Ankerpunktes auch nicht trivial
                     // daher wird je nach Ausrichtung einfach das passende SVG geladen.
+                    let svg;
                     if (horizontal) {
-                        schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.imageHor);
+                        // schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.imageHor);
+                        svg = await urlToSvg(schiff.imageHor)
                     } else {
-                        schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.image);
+                        // schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.image);
+                        svg = await urlToSvg(schiff.image)
                     }
 
                     // SVG wird auf 100% der Boxgröße skaliert, sonst wird das Bild nicht korrket dargestellt
-                    schiffImage.setAttribute('width', '100%');
-                    schiffImage.setAttribute('height', '100%');
-                    schiffBox.appendChild(schiffImage);
+                    // svg.setAttribute('width', '100%');
+                    // svg.setAttribute('height', '100%');
+                    schiffBox.appendChild(svg);
 
                     schiffeGruppe.appendChild(schiffBox);
-                    
+
                     // Markiere die Felder als belegt
                     for (let i = 0; i < schiff.groesse; i++) {
                         const schiffX = horizontal ? x + i : x;
@@ -250,11 +253,11 @@ function kannPlatzieren(x, y, groesse, horizontal, belegteFelder) {
     for (let i = 0; i < groesse; i++) {
         const schiffX = horizontal ? x + i : x;
         const schiffY = horizontal ? y : y + i;
-        
+
         if (schiffX >= FELDGROESSE || schiffY >= FELDGROESSE) {
             return false;
         }
-        
+
         for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
                 const checkX = schiffX + dx;
@@ -277,11 +280,11 @@ function pruefeKollisionen(belegteFelder) {
     for (let i = 0; i < felderArray.length; i++) {
         const [schiff1, koordinaten1] = felderArray[i].split(': ');
         const [x1, y1] = koordinaten1.split(',').map(Number);
-        
+
         for (let j = i + 1; j < felderArray.length; j++) {
             const [schiff2, koordinaten2] = felderArray[j].split(': ');
             const [x2, y2] = koordinaten2.split(',').map(Number);
-            
+
             if (schiff1 !== schiff2 && Math.abs(x1 - x2) <= 1 && Math.abs(y1 - y2) <= 1) {
                 return true; // Kollision gefunden
             }
@@ -290,19 +293,33 @@ function pruefeKollisionen(belegteFelder) {
     return false; // Keine Kollisionen
 }
 
+
+async function urlToSvg(logoUrl) {
+    const response = await fetch(logoUrl);
+    if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+    }
+    const text = await response.text();
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(text, "image/svg+xml");
+    console.log(doc.children[0].children)
+    return doc.children[0];
+}
+
 // Platzierung des Logos vom Sportverein
 function platziereLogo(svg) {
     const logoUrl = 'assets/logo.svg';
 
     // Funktion zum Erstellen und Platzieren eines Logos
-    function maleLogo(x, y) {
-        const logo = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-        logo.setAttributeNS('http://www.w3.org/1999/xlink', 'href', logoUrl);
-        logo.setAttribute('width', LOGOGROESSE);
-        logo.setAttribute('height', LOGOGROESSE);
-        logo.setAttribute('x', x);
-        logo.setAttribute('y', y);
-        svg.appendChild(logo);
+    async function maleLogo(x, y) {
+        // console.log(doc)
+        let doc = await urlToSvg(logoUrl)
+        doc.setAttribute('width', LOGOGROESSE);
+        doc.setAttribute('height', LOGOGROESSE);
+        doc.setAttribute('x', x);
+        doc.setAttribute('y', y);
+        svg.appendChild(doc);
+        xhr.send("");
     }
 
     // Platziere Logo in der oberen linken Ecke
@@ -337,7 +354,7 @@ function platziereBezeichnung(svg) {
 
     bezeichnung.setAttribute('x', RANDBREITE);
     bezeichnung.setAttribute('y', GESAMTGROESSE - RANDBREITE / 3);
-    bezeichnung.setAttribute('font-size', ZELLGROESSE / 5); 
+    bezeichnung.setAttribute('font-size', ZELLGROESSE / 5);
     bezeichnung.setAttribute('font-family', 'Calibri, sans-serif');
     bezeichnung.setAttribute('font-weight', 'bold');
     bezeichnung.setAttribute('text-anchor', 'start');
@@ -349,7 +366,7 @@ function platziereBezeichnung(svg) {
 // Platzierung des Vereinsnamens am unteren Rand
 function platziereVerein(svg) {
     const verein = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    
+
     verein.setAttribute('x', GESAMTGROESSE - RANDBREITE);
     verein.setAttribute('y', GESAMTGROESSE - RANDBREITE / 3);
     verein.setAttribute('font-size', ZELLGROESSE / 5);
