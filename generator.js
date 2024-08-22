@@ -2,8 +2,12 @@ const FELDGROESSE = 10;     // 10x10 Felder
 const urlParams = new URLSearchParams(window.location.search);
 // 70 ist die urspruengliche Groesse, erzeugt aber ein 7700x7700 Pixel großes Feld
 // Die Berechnung der Groesse muss noch einmal überarbeitet werden
-const ZELLGROESSE = parseInt(urlParams.get('groesse')) || 70;
+const ZELLGROESSE = 40;
 const SEED = parseInt(urlParams.get('seed')) || Math.floor(1 + Math.random() * 99999);
+var item = document.getElementById('seed-text');
+item.value = SEED;
+const DEBUG = urlParams.get('debug') != null && urlParams.get('debug') != undefined && urlParams.get('debug') != 'false'
+const PLAN = urlParams.get('plan') != null && urlParams.get('plan') != undefined && urlParams.get('plan') != 'false'
 // Falls nichts angegeben gehts auf default: 70 zurück
 const RANDBREITE = ZELLGROESSE / 2; // 350 Pixel
 const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel = 800 mm = 80 cm 
@@ -11,7 +15,8 @@ const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel 
 
 const LOGOGROESSE = RANDBREITE * 0.7; // 80% der Randbreite
 const SCHIFFZEICHNER = 'Lars Lars Herud, Sören Helms, Andrea Helms';    // Name der Illustratoren
-const SCHEIBENBEZEICHNUNG = 'Bogenschießen Schiffe versenken ' + SEED;          // Name der Scheibe
+const SCHEIBENBEZEICHNUNG = 'Bogenschießen Schiffe Versenken';          // Name der Scheibe
+const SEEDINFO = '[' + SEED + ']';                                      // Verwendeter Seed
 const VEREINSNAME = 'Schützenverein Rahlstedt u. Umg. v. 1906 e.V.';    // Name des Vereins
 
 
@@ -49,7 +54,7 @@ const SCHIFFE = [
         breite: 2,
         farbe: 'purple',
         image: 'schiffe/Flugzeugtraeger.svg',
-        imageHor: 'schiffe/Flugzeugtraeger-hor.svg'
+        modify: 'scale(0.75,1)'
     },
     {
         name: 'Zerstörer',
@@ -57,7 +62,6 @@ const SCHIFFE = [
         breite: 1,
         farbe: 'orange',
         image: 'schiffe/Zerstoerer.svg',
-        imageHor: 'schiffe/Zerstoerer-hor.svg'
     },
     {
         name: 'U-Boot',
@@ -65,7 +69,6 @@ const SCHIFFE = [
         breite: 1,
         farbe: 'yellow',
         image: 'schiffe/U-Boot.svg',
-        imageHor: 'schiffe/U-Boot-hor.svg'
     },
     {
         name: 'Kreuzer',
@@ -73,7 +76,6 @@ const SCHIFFE = [
         breite: 1,
         farbe: 'green',
         image: 'schiffe/Kreuzer.svg',
-        imageHor: 'schiffe/Kreuzer-hor.svg'
     },
     {
         name: 'Flugzeug',
@@ -81,7 +83,6 @@ const SCHIFFE = [
         breite: 1,
         farbe: 'red',
         image: 'schiffe/Flugzeug.svg',
-        imageHor: 'schiffe/Flugzeug.svg'    // gibt nur eine Orientierung
     },
     {
         name: 'Helikopter',
@@ -89,7 +90,6 @@ const SCHIFFE = [
         breite: 1,
         farbe: 'lightblue',
         image: 'schiffe/Helikopter.svg',
-        imageHor: 'schiffe/Helikopter.svg'    // gibt nur eine Orientierung
     },
     {
         name: 'Schnellboot',
@@ -97,20 +97,16 @@ const SCHIFFE = [
         breite: 1,
         farbe: 'darkblue',
         image: 'schiffe/Schnellboot.svg',
-        imageHor: 'schiffe/Schnellboot.svg'    // gibt nur eine Orientierung
     },
 ];
-var rng = new Random(SEED);
 
 
-function erstelleSpielfeld() {
 
-    const spielfeld = document.getElementById('spielfeld');
-    spielfeld.innerHTML = '';
+async function erstelleSpielfeld() {
 
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', '8000px');
-    svg.setAttribute('height', '8000px');
+    svg.setAttribute('width', '2000px');
+    svg.setAttribute('height', '2000px');
     svg.setAttribute('viewBox', `0 0 ${GESAMTGROESSE} ${GESAMTGROESSE}`);
 
     // Äußerer Rand
@@ -121,7 +117,7 @@ function erstelleSpielfeld() {
     rand.setAttribute('height', GESAMTGROESSE);
     rand.setAttribute('fill', 'none');
     rand.setAttribute('stroke', 'black');
-    rand.setAttribute('stroke-width', '2');
+    rand.setAttribute('stroke-width', '1');
     svg.appendChild(rand);
 
     // Schachbrettmuster & Koordinatengröße
@@ -188,9 +184,14 @@ function erstelleSpielfeld() {
         svg.appendChild(buchstabe);
     }
 
-    platziereSchiffe(svg);
-
-    spielfeld.appendChild(svg);
+    const result = await platziereSchiffe(svg);
+    // uncomment line to see debug
+    result.debug.setAttribute('transform', `translate(${RANDBREITE},${RANDBREITE})`)
+    if (DEBUG) {
+        svg.appendChild(result.debug);
+    }
+    svg.appendChild(result.schiffeGruppe);
+    result.schiffeGruppe.setAttribute('transform', `translate(${RANDBREITE},${RANDBREITE})`)
 
     platziereLogo(svg);
 
@@ -199,29 +200,31 @@ function erstelleSpielfeld() {
     platziereBezeichnung(svg);
 
     platziereVerein(svg);
+
+    return svg;
 }
 
 // Schiffe zufällig platzieren
-async function platziereSchiffe(svg) {
+async function platziereSchiffe() {
+    var rng = new Random(SEED);
     const debug = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    debug.setAttribute('transform', `translate(${RANDBREITE},${RANDBREITE})`)
-
-    // uncomment line to see debug
-    // svg.appendChild(debug);
 
     const schiffeGruppe = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    schiffeGruppe.setAttribute('transform', `translate(${RANDBREITE},${RANDBREITE})`)
-    svg.appendChild(schiffeGruppe);
 
     const field = []
     for (var c = 0; c < FELDGROESSE; c++) {
         field.push(new Array(FELDGROESSE).fill(0))
     }
+
     // Schiffe platzieren, bis keine Kollisionen mehr vorhanden sind
-    await placeRecursive(field, schiffeGruppe, debug, SCHIFFE)
+    await placeRecursive(field, schiffeGruppe, debug, SCHIFFE, rng)
+    return {
+        debug,
+        schiffeGruppe
+    }
 }
 
-async function placeRecursive(field, schiffeGruppe, debug, schiffe) {
+async function placeRecursive(field, schiffeGruppe, debug, schiffe, rng) {
     if (schiffe.length == 0) {
         return true;
     }
@@ -245,7 +248,7 @@ async function placeRecursive(field, schiffeGruppe, debug, schiffe) {
     // Schiff Laden
     const schiffBreite = ZELLGROESSE * schiff.breite;
     const schiffHöhe = ZELLGROESSE * schiff.groesse;
-    const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'g');
 
     // Fix plazierung von svg im grid pro orientation
     let px;
@@ -273,11 +276,19 @@ async function placeRecursive(field, schiffeGruppe, debug, schiffe) {
             break;
     }
     // Schiff plazieren
-    schiffBox.setAttribute('width', schiffBreite);
-    schiffBox.setAttribute('height', schiffHöhe);
     schiffBox.setAttribute('transform', `translate(${px},${py}) rotate(${90 * rotation} ${ZELLGROESSE / 2} ${ZELLGROESSE / 2})`);
-    const svg = await urlToSvg(schiff.image);
-    schiffBox.appendChild(svg);
+    // schiffBox.setAttribute('x', px);
+    // schiffBox.setAttribute('y', py);
+    // schiffBox.setAttribute('transform', `rotate(${90 * rotation} ${ZELLGROESSE / 2} ${ZELLGROESSE / 2})`);
+
+    const svg = await urlToSvg(schiff.image, schiffBreite, schiffHöhe);
+    const modShipImage = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    if (schiff.modify) {
+        modShipImage.setAttribute('transform', schiff.modify)
+    }
+    modShipImage.appendChild(svg)
+
+    schiffBox.appendChild(modShipImage);
     schiffeGruppe.appendChild(schiffBox);
 
 
@@ -298,12 +309,12 @@ async function placeRecursive(field, schiffeGruppe, debug, schiffe) {
     hitBox.setAttribute('height', (ZELLGROESSE * (heigth + 2)));
     hitBox.setAttribute('transform', `translate(${ZELLGROESSE * (x - 1)},${ZELLGROESSE * (y - 1)})`);
     // hitBox.setAttribute('fill', "red");
-    hitBox.setAttribute("style", "fill:rgb(0,0,255);stroke-width:3;stroke:red;fill-opacity:0.1;stroke-opacity:0.9")
+    hitBox.setAttribute("style", "fill:rgb(0,0,255);stroke-width:2;stroke:rgb(255,0,0);fill-opacity:0.1;stroke-opacity:0.9")
     debug.appendChild(hitBox);
     let wasOk = false;
     let c = 0;
     while (!wasOk && c < 10) {
-        wasOk = await placeRecursive(field, schiffeGruppe, debug, [...schiffe]);
+        wasOk = await placeRecursive(field, schiffeGruppe, debug, [...schiffe], rng);
         c++;
     }
     return wasOk;
@@ -311,7 +322,7 @@ async function placeRecursive(field, schiffeGruppe, debug, schiffe) {
 
 
 
-async function urlToSvg(logoUrl) {
+async function urlToSvg(logoUrl, width, height) {
     const response = await fetch(logoUrl);
     if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
@@ -319,7 +330,14 @@ async function urlToSvg(logoUrl) {
     const text = await response.text();
     var parser = new DOMParser();
     var doc = parser.parseFromString(text, "image/svg+xml");
-    return doc.children[0];
+
+    const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    schiffBox.setAttribute('transform', `scale(${width / doc.children[0].viewBox.baseVal.width},${height / doc.children[0].viewBox.baseVal.height})`);
+    for (var children of doc.children[0].children) {
+        schiffBox.appendChild(children)
+    }
+
+    return schiffBox;
 }
 
 // Platzierung des Logos vom Sportverein
@@ -328,12 +346,11 @@ function platziereLogo(svg) {
 
     // Funktion zum Erstellen und Platzieren eines Logos
     async function maleLogo(x, y) {
-        let doc = await urlToSvg(logoUrl)
-        doc.setAttribute('width', LOGOGROESSE);
-        doc.setAttribute('height', LOGOGROESSE);
-        doc.setAttribute('x', x);
-        doc.setAttribute('y', y);
-        svg.appendChild(doc);
+        let doc = await urlToSvg(logoUrl, LOGOGROESSE, LOGOGROESSE)
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.setAttribute('transform', `translate(${x},${y})`);
+        group.appendChild(doc);
+        svg.appendChild(group);
     }
 
     // Platziere Logo in der oberen linken Ecke
@@ -345,7 +362,7 @@ function platziereLogo(svg) {
 
 // Platzierung der Credits am rechten Rand
 function platziereCredits(svg) {
-    const creditsText = 'Idee & Konzept: Lars Herud – Illustration: ' + SCHIFFZEICHNER + ' – Programmierung: Sören Helms';
+    const creditsText = 'Idee & Konzept: Lars Herud – Illustration: ' + SCHIFFZEICHNER + ' – Programmierung: Sören Helms, Jonas Veenhof';
     const githubText = 'Quellcode auf GitHub: https://github.com/HSoeren/schiffeversenken';
 
     const credits = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -364,7 +381,6 @@ function platziereCredits(svg) {
 // Platzierung der Scheibenbezeichnung am unteren Rand
 function platziereBezeichnung(svg) {
     const bezeichnung = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    const abmessung = GESAMTGROESSE / 10;
 
     bezeichnung.setAttribute('x', RANDBREITE);
     bezeichnung.setAttribute('y', GESAMTGROESSE - RANDBREITE / 3);
@@ -372,7 +388,7 @@ function platziereBezeichnung(svg) {
     bezeichnung.setAttribute('font-family', 'Calibri, sans-serif');
     bezeichnung.setAttribute('font-weight', 'bold');
     bezeichnung.setAttribute('text-anchor', 'start');
-    bezeichnung.textContent = `${SCHEIBENBEZEICHNUNG} (${abmessung} x ${abmessung} cm)`;
+    bezeichnung.textContent = `${SCHEIBENBEZEICHNUNG} ${SEEDINFO}`;
 
     svg.appendChild(bezeichnung);
 }
@@ -392,4 +408,182 @@ function platziereVerein(svg) {
     svg.appendChild(verein);
 }
 
-window.onload = erstelleSpielfeld;
+
+async function erstellePlan() {
+    const response = await fetch("assets/spielzettel.svg");
+    if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+    }
+    const text = await response.text();
+    var parser = new DOMParser();
+    var svg = parser.parseFromString(text, "image/svg+xml").children[0];
+
+    const result = await platziereSchiffe(svg);
+    const linienStaerke = 2;
+    const fontSkalierung = 1.2;
+    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    const RANDBREITE = 40;
+    // Vertikale Linien
+    for (let i = 0; i <= FELDGROESSE; i++) {
+        const linie = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        linie.setAttribute('x1', RANDBREITE + i * ZELLGROESSE);
+        linie.setAttribute('y1', RANDBREITE);
+        linie.setAttribute('x2', RANDBREITE + i * ZELLGROESSE);
+        linie.setAttribute('y2', RANDBREITE + FELDGROESSE * ZELLGROESSE);
+        linie.setAttribute('stroke', 'black');
+        linie.setAttribute('stroke-width', linienStaerke);
+        group.appendChild(linie);
+    }
+
+    // Horizontale Linien
+    for (let j = 0; j <= FELDGROESSE; j++) {
+        const linie = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        linie.setAttribute('x1', RANDBREITE);
+        linie.setAttribute('y1', RANDBREITE + j * ZELLGROESSE);
+        linie.setAttribute('x2', RANDBREITE + FELDGROESSE * ZELLGROESSE);
+        linie.setAttribute('y2', RANDBREITE + j * ZELLGROESSE);
+        linie.setAttribute('stroke', 'black');
+        linie.setAttribute('stroke-width', linienStaerke);
+        group.appendChild(linie);
+    }
+    for (let i = 0; i < FELDGROESSE; i++) {
+        // Zahlen (1-10) oberhalb des Schachbretts
+        const zahl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        zahl.setAttribute('x', RANDBREITE + i * ZELLGROESSE + ZELLGROESSE / 2);
+        zahl.setAttribute('y', RANDBREITE / 2);
+        zahl.setAttribute('text-anchor', 'middle');
+        zahl.setAttribute('dominant-baseline', 'central');
+        zahl.setAttribute('font-family', 'Calibri, sans-serif');
+        zahl.setAttribute('font-weight', 'bold');
+        zahl.setAttribute('font-size', RANDBREITE / fontSkalierung);
+        zahl.textContent = i + 1;
+        group.appendChild(zahl);
+
+        // Buchstaben (A-J) links vom Schachbrett
+        const buchstabe = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        buchstabe.setAttribute('x', RANDBREITE / 2);
+        buchstabe.setAttribute('y', RANDBREITE + i * ZELLGROESSE + ZELLGROESSE / 2);
+        buchstabe.setAttribute('text-anchor', 'middle');
+        buchstabe.setAttribute('dominant-baseline', 'central');
+        buchstabe.setAttribute('font-family', 'Calibri, sans-serif');
+        buchstabe.setAttribute('font-weight', 'bold');
+        buchstabe.setAttribute('font-size', RANDBREITE / fontSkalierung);
+        buchstabe.textContent = String.fromCharCode(65 + i);
+        group.appendChild(buchstabe);
+    }
+    group.appendChild(result.schiffeGruppe);
+    result.schiffeGruppe.setAttribute('transform', `translate(${RANDBREITE},${RANDBREITE})`)
+    result.debug.setAttribute('transform', `translate(${RANDBREITE},${RANDBREITE})`)
+    if (DEBUG) {
+        group.appendChild(result.debug);
+    }
+    group.setAttribute('transform', `scale(0.4,0.4)`);
+
+
+    var tleft = svg.getElementById('TOPLEFT');
+    tleft.appendChild(group.cloneNode(true));
+    tleft.setAttribute('transform', "matrix(4.16667,0,0,4.16667,0,0) translate(55,220)")
+    var tright = svg.getElementById('TOPRIGHT');
+    tright.appendChild(group.cloneNode(true));
+    tright.setAttribute('transform', "matrix(4.16667,0,0,4.16667,0,0) translate(310,220)")
+    var dleft = svg.getElementById('BOTTOMLEFT');
+    dleft.appendChild(group.cloneNode(true));
+    dleft.setAttribute('transform', "matrix(4.16667,0,0,4.16667,0,0) translate(55,490)")
+    var dright = svg.getElementById('BOTTOMRIGHT');
+    dright.appendChild(group.cloneNode(true));
+    dright.setAttribute('transform', "matrix(4.16667,0,0,4.16667,0,0) translate(310,490)")
+
+    const planseed = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    planseed.setAttribute('x', 10);
+    planseed.setAttribute('y', 10);
+    planseed.setAttribute('text-anchor', 'left');
+    planseed.setAttribute('dominant-baseline', 'central');
+    planseed.setAttribute('font-family', 'Calibri, sans-serif');
+    planseed.setAttribute('font-weight', 'normal');
+    planseed.setAttribute('font-size', '20 px');
+    planseed.textContent = '[' + SEED + ']';
+    planseed.setAttribute('transform', `scale(0.5,0.5) translate(650,120)`);
+    var head = svg.getElementById('HEAD');
+    head.appendChild(planseed);
+
+
+    //transform="matrix(4.16667,0,0,4.16667,0,0) translate(55,230)
+
+    return svg;
+}
+
+async function zeigePlan() {
+    const spielfeld = document.getElementById('spielfeld');
+    spielfeld.innerHTML = '';
+    const plan = await erstellePlan();
+    spielfeld.appendChild(plan);
+}
+
+async function zeigeSpielfeld() {
+    const spielfeld = document.getElementById('spielfeld');
+    spielfeld.innerHTML = '';
+    const plan = await erstelleSpielfeld();;
+    spielfeld.appendChild(plan);
+}
+
+function downloadfile(spielfeld, name) {
+    spielfeld.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    spielfeld.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+
+    // Serialisiere das SVG
+    const svgData = new XMLSerializer().serializeToString(spielfeld);
+
+    // Erstelle einen Blob und Download-Link
+    const blob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${name}-${SEED}.svg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+}
+async function downloadPlan() {
+    const spielfeld = await erstellePlan();
+    downloadfile(spielfeld, 'SpielPlan');
+}
+
+document.getElementById("spielplan-svg").onclick = downloadPlan;
+
+window.onload = () => {
+    if (PLAN) {
+        zeigePlan();
+    }
+    else {
+        zeigeSpielfeld();
+    }
+};
+
+async function downloadSVG() {
+    const spielfeld = await erstelleSpielfeld();
+    downloadfile(spielfeld, 'Spielfeld');
+}
+
+document.getElementById("scheibe-svg").onclick = downloadSVG;
+
+document.getElementById("neuer-seed").onclick = () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('seed', Math.floor(1 + Math.random() * 99999));
+    window.location.href = url.href;
+
+};
+
+document.getElementById("seed-open").onclick = () => {
+    var item = document.getElementById('seed-text');
+    const url = new URL(window.location.href);
+    url.searchParams.set('seed', item.value);
+    window.location.href = url.href;
+
+};
+
+
+
+
