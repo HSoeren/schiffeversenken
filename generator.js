@@ -31,12 +31,50 @@ const Random = class SeededRandom {
         this.state = (this.a * this.state + this.c) % this.m;
         return this.state;
     }
+    nextRange(start, end) {
+        var rangeSize = end - start + 1;
+        var randomUnder1 = this.nextInt() / this.m;
+        return start + Math.floor(randomUnder1 * rangeSize);
+    }
 
 }
 
 // Eine Breite größer 1 ist möglich, in diesem Fall wird aber aktuell keine korrekte
 // Kollisionsprüfung durchgeführt. Die Schiffe werden dann eventuell zu nah gesetzt.
+// Sortioert nach gröse um es back trackking einfgachaer zu machen
 const SCHIFFE = [
+    {
+        name: 'Flugzeugträger',
+        groesse: 5,
+        breite: 2,
+        farbe: 'purple',
+        image: 'schiffe/Flugzeugtraeger.svg',
+        imageHor: 'schiffe/Flugzeugtraeger-hor.svg'
+    },
+    {
+        name: 'Zerstörer',
+        groesse: 4,
+        breite: 1,
+        farbe: 'orange',
+        image: 'schiffe/Zerstoerer.svg',
+        imageHor: 'schiffe/Zerstoerer-hor.svg'
+    },
+    {
+        name: 'U-Boot',
+        groesse: 3,
+        breite: 1,
+        farbe: 'yellow',
+        image: 'schiffe/U-Boot.svg',
+        imageHor: 'schiffe/U-Boot-hor.svg'
+    },
+    {
+        name: 'Kreuzer',
+        groesse: 2,
+        breite: 1,
+        farbe: 'green',
+        image: 'schiffe/Kreuzer.svg',
+        imageHor: 'schiffe/Kreuzer-hor.svg'
+    },
     {
         name: 'Flugzeug',
         groesse: 1,
@@ -61,38 +99,6 @@ const SCHIFFE = [
         image: 'schiffe/Schnellboot.svg',
         imageHor: 'schiffe/Schnellboot.svg'    // gibt nur eine Orientierung
     },
-    {
-        name: 'Kreuzer',
-        groesse: 2,
-        breite: 1,
-        farbe: 'green',
-        image: 'schiffe/Kreuzer.svg',
-        imageHor: 'schiffe/Kreuzer-hor.svg'
-    },
-    {
-        name: 'U-Boot',
-        groesse: 3,
-        breite: 1,
-        farbe: 'yellow',
-        image: 'schiffe/U-Boot.svg',
-        imageHor: 'schiffe/U-Boot-hor.svg'
-    },
-    {
-        name: 'Zerstörer',
-        groesse: 4,
-        breite: 1,
-        farbe: 'orange',
-        image: 'schiffe/Zerstoerer.svg',
-        imageHor: 'schiffe/Zerstoerer-hor.svg'
-    },
-    {
-        name: 'Flugzeugträger',
-        groesse: 5,
-        breite: 2,
-        farbe: 'purple',
-        image: 'schiffe/Flugzeugtraeger.svg',
-        imageHor: 'schiffe/Flugzeugtraeger-hor.svg'
-    }
 ];
 var rng = new Random(SEED);
 
@@ -197,120 +203,112 @@ function erstelleSpielfeld() {
 
 // Schiffe zufällig platzieren
 async function platziereSchiffe(svg) {
-    let belegteFelder;          // const kann nicht verwendet werden, da belegteFelder neu gesetzt wird
-    let platzierungErfolgreich = false;
+    const debug = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    debug.setAttribute('transform', `translate(${RANDBREITE},${RANDBREITE})`)
+
+    // uncomment line to see debug
+    // svg.appendChild(debug);
+
     const schiffeGruppe = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    schiffeGruppe.setAttribute('transform', `translate(${RANDBREITE},${RANDBREITE})`)
     svg.appendChild(schiffeGruppe);
 
+    const field = []
+    for (var c = 0; c < FELDGROESSE; c++) {
+        field.push(new Array(FELDGROESSE).fill(0))
+    }
     // Schiffe platzieren, bis keine Kollisionen mehr vorhanden sind
-    while (!platzierungErfolgreich) {
-        belegteFelder = new Set();
-        schiffeGruppe.innerHTML = ''; // Nur die Schiffe löschen, nicht das Spielfeld
-
-        // für jedes Schiff in der Liste SCHIFFE wird eine zufällige Koordinate ermittelt
-        // dann geprüft, ob das Schiff dort platziert werden kann, wenn ja, wird ein farbiges Rechteck gezeichnet
-
-        for (var schiff of SCHIFFE) {
-            let platziert = false;
-            while (!platziert) {
-                const x = Math.floor(rng.nextFloat() * FELDGROESSE);
-                const y = Math.floor(rng.nextFloat() * FELDGROESSE);
-                const horizontal = rng.nextFloat() < 0.5; // zufällige Ausrichtung
-
-                if (kannPlatzieren(x, y, schiff.groesse, horizontal, belegteFelder)) {
-                    // 1 SVG statt n SVG pro Schiff
-                    const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-
-                    // Berechne Breite und Höhe des Schiffes
-                    const schiffBreite = horizontal ? ZELLGROESSE * schiff.groesse : ZELLGROESSE * schiff.breite;
-                    const schiffHöhe = horizontal ? ZELLGROESSE * schiff.breite : ZELLGROESSE * schiff.groesse;
-
-                    // Berechne die Position der SVG-Box
-                    schiffBox.setAttribute('x', RANDBREITE + (horizontal ? x * ZELLGROESSE : x * ZELLGROESSE - (schiffBreite - ZELLGROESSE)));
-                    schiffBox.setAttribute('y', RANDBREITE + (horizontal ? y * ZELLGROESSE - (schiffHöhe - ZELLGROESSE) : y * ZELLGROESSE));
-
-                    // Setze die Breite und Höhe der Box
-                    schiffBox.setAttribute('width', schiffBreite);
-                    schiffBox.setAttribute('height', schiffHöhe);
-
-                    // Füge das Schiff-Bild hinzu
-                    // const schiffImage = document.createElementNS('http://www.w3.org/2000/svg', 'image');
-                    // Drehen von SVGs ist eine Gesschichte, das finden des Ankerpunktes auch nicht trivial
-                    // daher wird je nach Ausrichtung einfach das passende SVG geladen.
-                    let svg;
-                    if (horizontal) {
-                        // schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.imageHor);
-                        svg = await urlToSvg(schiff.imageHor)
-                    } else {
-                        // schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.image);
-                        svg = await urlToSvg(schiff.image)
-                    }
-                    schiffBox.appendChild(svg);
-
-                    schiffeGruppe.appendChild(schiffBox);
-
-
-                    // Markiere die Felder als belegt
-                    for (let i = 0; i < schiff.groesse; i++) {
-                        const schiffX = horizontal ? x + i : x;
-                        const schiffY = horizontal ? y : y + i;
-                        belegteFelder.add(`${schiff.name}: ${schiffX},${schiffY}`);
-                    }
-                    platziert = true;
-                }
-            }
-        }
-
-        // Beenden der While-Schleife, wenn keine Kollisionen gefunden wurden
-        platzierungErfolgreich = !pruefeKollisionen(belegteFelder);
-    }
+    await placeRecursive(field, schiffeGruppe, debug, SCHIFFE)
 }
 
-// Funktion zur Überprüfung, ob ein Schiff an einer bestimmten Position platziert werden kann
-// Regel: 1 Feld Platz drumherum
-function kannPlatzieren(x, y, groesse, horizontal, belegteFelder) {
-    for (let i = 0; i < groesse; i++) {
-        const schiffX = horizontal ? x + i : x;
-        const schiffY = horizontal ? y : y + i;
+async function placeRecursive(field, schiffeGruppe, debug, schiffe) {
+    if (schiffe.length == 0) {
+        return true;
+    }
+    const schiff = schiffe[0]
+    schiffe.shift();
+    const rotation = rng.nextRange(0, 3);
+    const width = rotation == 0 || rotation == 2 ? schiff.breite : schiff.groesse
+    const heigth = rotation == 0 || rotation == 2 ? schiff.groesse : schiff.breite
+    const x = rng.nextRange(0, FELDGROESSE - width); // Breite abziehen um nicht herrauszuragen
+    const y = rng.nextRange(0, FELDGROESSE - heigth);// Höhe abziehen um nicht herrauszuragen
 
-        if (schiffX >= FELDGROESSE || schiffY >= FELDGROESSE) {
-            return false;
-        }
-
-        for (let dx = -1; dx <= 1; dx++) {
-            for (let dy = -1; dy <= 1; dy++) {
-                const checkX = schiffX + dx;
-                const checkY = schiffY + dy;
-                if (checkX >= 0 && checkX < FELDGROESSE && checkY >= 0 && checkY < FELDGROESSE) {
-                    if (belegteFelder.has(`${checkX},${checkY}`)) {
-                        return false;
-                    }
-                }
+    for (let fy = y; fy < y + heigth; fy++) {
+        for (let fx = x; fx < x + width; fx++) {
+            if (field[fy][fx]) {
+                return false;
             }
         }
     }
-    return true;
-}
 
-// Funktion zur Überprüfung von Kollisionen nach der Platzierung
-// Alle Felder werden in ein Array umgewandelt und paarweise auf Kollisionen geprüft
-function pruefeKollisionen(belegteFelder) {
-    const felderArray = Array.from(belegteFelder);
-    for (let i = 0; i < felderArray.length; i++) {
-        const [schiff1, koordinaten1] = felderArray[i].split(': ');
-        const [x1, y1] = koordinaten1.split(',').map(Number);
 
-        for (let j = i + 1; j < felderArray.length; j++) {
-            const [schiff2, koordinaten2] = felderArray[j].split(': ');
-            const [x2, y2] = koordinaten2.split(',').map(Number);
+    // Schiff Laden
+    const schiffBreite = ZELLGROESSE * schiff.breite;
+    const schiffHöhe = ZELLGROESSE * schiff.groesse;
+    const schiffBox = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
-            if (schiff1 !== schiff2 && Math.abs(x1 - x2) <= 1 && Math.abs(y1 - y2) <= 1) {
-                return true; // Kollision gefunden
+    // Fix plazierung von svg im grid pro orientation
+    let px;
+    let py;
+    switch (rotation) {
+        case 0:
+            px = ((x) * ZELLGROESSE)
+            py = ((y) * ZELLGROESSE)
+            break;
+        case 1:
+            px = ((x + width - 1) * ZELLGROESSE)
+            py = ((y) * ZELLGROESSE)
+            break;
+        case 2:
+            px = ((x + width - 1) * ZELLGROESSE)
+            py = ((y + heigth - 1) * ZELLGROESSE)
+            break;
+        case 3:
+            px = ((x) * ZELLGROESSE)
+            py = ((y + heigth - 1) * ZELLGROESSE)
+            break;
+        default:
+            px = ((x) * ZELLGROESSE)
+            py = ((y - heigth + 1) * ZELLGROESSE)
+            break;
+    }
+    // Schiff plazieren
+    schiffBox.setAttribute('width', schiffBreite);
+    schiffBox.setAttribute('height', schiffHöhe);
+    schiffBox.setAttribute('transform', `translate(${px},${py}) rotate(${90 * rotation} ${ZELLGROESSE / 2} ${ZELLGROESSE / 2})`);
+    const svg = await urlToSvg(schiff.image);
+    schiffBox.appendChild(svg);
+    schiffeGruppe.appendChild(schiffBox);
+
+
+    // debug plazieren
+    for (let fy = y - 1; fy < y + heigth + 1; fy++) {
+        for (let fx = x - 1; fx < x + width + 1; fx++) {
+            if (fx < 0 || fx >= FELDGROESSE) {
+                continue; // aus dem feld
             }
+            if (fy < 0 || fy >= FELDGROESSE) {
+                continue; // aus dem feld
+            }
+            field[fy][fx] = 1;
         }
     }
-    return false; // Keine Kollisionen
+    const hitBox = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    hitBox.setAttribute('width', (ZELLGROESSE * (width + 2)));
+    hitBox.setAttribute('height', (ZELLGROESSE * (heigth + 2)));
+    hitBox.setAttribute('transform', `translate(${ZELLGROESSE * (x - 1)},${ZELLGROESSE * (y - 1)})`);
+    // hitBox.setAttribute('fill', "red");
+    hitBox.setAttribute("style", "fill:rgb(0,0,255);stroke-width:3;stroke:red;fill-opacity:0.1;stroke-opacity:0.9")
+    debug.appendChild(hitBox);
+    let wasOk = false;
+    let c = 0;
+    while (!wasOk && c < 10) {
+        wasOk = await placeRecursive(field, schiffeGruppe, debug, [...schiffe]);
+        c++;
+    }
+    return wasOk;
 }
+
 
 
 async function urlToSvg(logoUrl) {
