@@ -173,7 +173,7 @@ function erstelleSpielfeld() {
 }
 
 // Schiffe zufällig platzieren
-function platziereSchiffe(svg) {
+async function platziereSchiffe(svg) {
     let belegteFelder;          // const kann nicht verwendet werden, da belegteFelder neu gesetzt wird
     let platzierungErfolgreich = false;
     const schiffeGruppe = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -186,7 +186,8 @@ function platziereSchiffe(svg) {
 
         // für jedes Schiff in der Liste SCHIFFE wird eine zufällige Koordinate ermittelt
         // dann geprüft, ob das Schiff dort platziert werden kann, wenn ja, wird ein farbiges Rechteck gezeichnet
-        SCHIFFE.forEach(async schiff => {
+
+        for (var schiff of SCHIFFE) {
             let platziert = false;
             while (!platziert) {
                 const x = Math.floor(Math.random() * FELDGROESSE);
@@ -221,13 +222,10 @@ function platziereSchiffe(svg) {
                         // schiffImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', schiff.image);
                         svg = await urlToSvg(schiff.image)
                     }
-
-                    // SVG wird auf 100% der Boxgröße skaliert, sonst wird das Bild nicht korrket dargestellt
-                    // svg.setAttribute('width', '100%');
-                    // svg.setAttribute('height', '100%');
                     schiffBox.appendChild(svg);
 
                     schiffeGruppe.appendChild(schiffBox);
+
 
                     // Markiere die Felder als belegt
                     for (let i = 0; i < schiff.groesse; i++) {
@@ -238,7 +236,7 @@ function platziereSchiffe(svg) {
                     platziert = true;
                 }
             }
-        });
+        }
 
         // Beenden der While-Schleife, wenn keine Kollisionen gefunden wurden
         platzierungErfolgreich = !pruefeKollisionen(belegteFelder);
