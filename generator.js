@@ -3,6 +3,7 @@ const urlParams = new URLSearchParams(window.location.search);
 // 70 ist die urspruengliche Groesse, erzeugt aber ein 7700x7700 Pixel großes Feld
 // Die Berechnung der Groesse muss noch einmal überarbeitet werden
 const ZELLGROESSE = parseInt(urlParams.get('groesse')) || 70;
+const SEED = parseInt(urlParams.get('seed')) || Math.floor(1 + Math.random() * 99999);
 // Falls nichts angegeben gehts auf default: 70 zurück
 const RANDBREITE = ZELLGROESSE / 2; // 350 Pixel
 const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel = 800 mm = 80 cm 
@@ -10,8 +11,28 @@ const GESAMTGROESSE = FELDGROESSE * ZELLGROESSE + 2 * RANDBREITE; // 8000 Pixel 
 
 const LOGOGROESSE = RANDBREITE * 0.7; // 80% der Randbreite
 const SCHIFFZEICHNER = 'Lars Lars Herud, Sören Helms, Andrea Helms';    // Name der Illustratoren
-const SCHEIBENBEZEICHNUNG = 'Bogenschießen Schiffe versenken';          // Name der Scheibe
+const SCHEIBENBEZEICHNUNG = 'Bogenschießen Schiffe versenken ' + SEED;          // Name der Scheibe
 const VEREINSNAME = 'Schützenverein Rahlstedt u. Umg. v. 1906 e.V.';    // Name des Vereins
+
+
+const Random = class SeededRandom {
+    constructor(seed) {
+        this.seed = seed;
+        this.m = 0x80000000;
+        this.a = 1103515245;
+        this.c = 12345;
+        this.state = seed ? seed : Math.floor(this.nextInt() * (this.m - 1));
+    }
+
+    nextFloat() {
+        return this.nextInt() / (this.m - 1);
+    }
+    nextInt() {
+        this.state = (this.a * this.state + this.c) % this.m;
+        return this.state;
+    }
+
+}
 
 // Eine Breite größer 1 ist möglich, in diesem Fall wird aber aktuell keine korrekte
 // Kollisionsprüfung durchgeführt. Die Schiffe werden dann eventuell zu nah gesetzt.
@@ -73,6 +94,8 @@ const SCHIFFE = [
         imageHor: 'schiffe/Flugzeugtraeger-hor.svg'
     }
 ];
+var rng = new Random(SEED);
+
 
 function erstelleSpielfeld() {
 
@@ -190,9 +213,9 @@ async function platziereSchiffe(svg) {
         for (var schiff of SCHIFFE) {
             let platziert = false;
             while (!platziert) {
-                const x = Math.floor(Math.random() * FELDGROESSE);
-                const y = Math.floor(Math.random() * FELDGROESSE);
-                const horizontal = Math.random() < 0.5; // zufällige Ausrichtung
+                const x = Math.floor(rng.nextFloat() * FELDGROESSE);
+                const y = Math.floor(rng.nextFloat() * FELDGROESSE);
+                const horizontal = rng.nextFloat() < 0.5; // zufällige Ausrichtung
 
                 if (kannPlatzieren(x, y, schiff.groesse, horizontal, belegteFelder)) {
                     // 1 SVG statt n SVG pro Schiff
@@ -241,8 +264,6 @@ async function platziereSchiffe(svg) {
         // Beenden der While-Schleife, wenn keine Kollisionen gefunden wurden
         platzierungErfolgreich = !pruefeKollisionen(belegteFelder);
     }
-
-    console.log(belegteFelder);
 }
 
 // Funktion zur Überprüfung, ob ein Schiff an einer bestimmten Position platziert werden kann
@@ -300,7 +321,6 @@ async function urlToSvg(logoUrl) {
     const text = await response.text();
     var parser = new DOMParser();
     var doc = parser.parseFromString(text, "image/svg+xml");
-    console.log(doc.children[0].children)
     return doc.children[0];
 }
 
@@ -310,14 +330,12 @@ function platziereLogo(svg) {
 
     // Funktion zum Erstellen und Platzieren eines Logos
     async function maleLogo(x, y) {
-        // console.log(doc)
         let doc = await urlToSvg(logoUrl)
         doc.setAttribute('width', LOGOGROESSE);
         doc.setAttribute('height', LOGOGROESSE);
         doc.setAttribute('x', x);
         doc.setAttribute('y', y);
         svg.appendChild(doc);
-        xhr.send("");
     }
 
     // Platziere Logo in der oberen linken Ecke
