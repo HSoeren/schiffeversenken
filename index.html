@@ -17,11 +17,12 @@
           immer die gleiche Scheibe erzeugen.
         </p>
         <button class="download-btn" id="neuer-seed">Neue Scheibe</button>
-        <p style="color: #777; text-align: center">
-          Seed: <input type="text" id="seed-text" />
-        </p>
-
-        <button class="download-btn" id="seed-open">Scheibe Laden</button>
+        
+        <div class="input-button-container">
+          <input type="text" id="seed-text" class="seed-input" placeholder="Seed" />
+          <button class="load-btn" id="seed-open">Laden</button>
+        </div>
+        
         <br />
         <button class="download-btn" id="scheibe-svg">Scheibe (SVG)</button>
         <button class="download-btn" id="spielplan-svg">Spielplan (SVG)</button>
@@ -29,7 +30,6 @@
         <a href="https://github.com/HSoeren/schiffeversenken" target="_blank"
           ><button class="download-btn">GitHub</button></a
         >
-        <br />
         <a href="https://svrahlstedt.de/bogen/" target="_blank"
           ><button class="download-btn">Unser Verein</button></a
         >
