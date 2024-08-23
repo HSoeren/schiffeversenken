@@ -217,7 +217,7 @@ async function platziereSchiffe() {
     }
 
     // Schiffe platzieren, bis keine Kollisionen mehr vorhanden sind
-    await placeRecursive(field, schiffeGruppe, debug, SCHIFFE, rng)
+    await placeRecursive(field, schiffeGruppe, debug, [...SCHIFFE], rng)
     return {
         debug,
         schiffeGruppe
