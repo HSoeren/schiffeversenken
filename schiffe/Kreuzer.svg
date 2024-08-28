@@ -68,34 +68,29 @@
                 </g>
             </g>
         </g>
-    </g>
-    <g id="Trennlinie">
-        <path d="M144.387,472.441L159.574,472.441" style="fill:none;stroke:rgb(8,6,5);stroke-width:2.08px;"/>
-        <g transform="matrix(1.32085,1.24764e-07,1.24764e-07,1,-21.6607,-1.21088e-05)">
-            <path d="M144.387,472.441L159.574,472.441" style="fill:none;stroke:rgb(8,6,5);stroke-width:1.78px;"/>
+        <g transform="matrix(0.48,0,0,0.48,187.188,-161.949)">
+            <path d="M144.387,472.441L159.574,472.441" style="fill:none;stroke:rgb(8,6,5);stroke-width:6px;"/>
         </g>
-        <g transform="matrix(1.31885,1.23986e-07,1.23986e-07,1,92.9401,3.26904e-06)">
-            <path d="M144.387,472.441L159.574,472.441" style="fill:none;stroke:rgb(8,6,5);stroke-width:1.78px;"/>
+        <g transform="matrix(0.48,-9.84474e-17,-7.45334e-17,0.48,267.375,-161.949)">
+            <path d="M144.387,472.441L159.574,472.441" style="fill:none;stroke:rgb(8,6,5);stroke-width:6px;"/>
         </g>
-        <g transform="matrix(1,-2.05099e-16,-1.55278e-16,1,167.056,2.89726e-05)">
-            <path d="M144.387,472.441L159.574,472.441" style="fill:none;stroke:rgb(8,6,5);stroke-width:2.08px;"/>
+        <g transform="matrix(0.48,0,0,0.48,187.188,-161.949)">
+            <path d="M159.574,472.441L169.053,472.441" style="fill:none;stroke:white;stroke-width:6px;"/>
         </g>
-        <g transform="matrix(4.90582,1.5188e-06,1.5188e-06,1,-509.337,-0.000227096)">
-            <path d="M144.387,472.441L159.574,472.441" style="fill:none;stroke:rgb(8,6,5);stroke-width:0.59px;"/>
+        <g transform="matrix(0.499263,0,0,0.48,238.801,-161.949)">
+            <path d="M159.574,472.441L169.053,472.441" style="fill:none;stroke:white;stroke-width:6px;"/>
         </g>
-        <path d="M159.574,472.441L169.053,472.441" style="fill:none;stroke:white;stroke-width:2.08px;"/>
-        <g transform="matrix(1.04013,0,0,1,107.528,-7.80029e-06)">
-            <path d="M159.574,472.441L169.053,472.441" style="fill:none;stroke:white;stroke-width:2.04px;"/>
+        <g transform="matrix(0.407593,0,0,0.48,267.776,-161.949)">
+            <path d="M159.574,472.441L169.053,472.441" style="fill:none;stroke:white;stroke-width:6px;"/>
         </g>
-        <g transform="matrix(0.849151,0,0,1,167.892,2.89726e-05)">
-            <path d="M159.574,472.441L169.053,472.441" style="fill:none;stroke:white;stroke-width:2.25px;"/>
+        <g transform="matrix(1.35661,0,0,0.48,127.49,-161.949)">
+            <path d="M159.574,472.441L169.053,472.441" style="fill:none;stroke:white;stroke-width:6px;"/>
         </g>
-        <g transform="matrix(2.82628,0,0,1,-124.371,3.48782e-05)">
-            <path d="M159.574,472.441L169.053,472.441" style="fill:none;stroke:white;stroke-width:0.98px;"/>
+        <g transform="matrix(0.500774,0,0,0.48,198.051,-161.949)">
+            <path d="M159.574,472.441L169.053,472.441" style="fill:none;stroke:white;stroke-width:6px;"/>
         </g>
-        <g transform="matrix(1.04328,0,0,1,22.6322,1.7053e-13)">
-            <path d="M159.574,472.441L169.053,472.441" style="fill:none;stroke:white;stroke-width:2.04px;"/>
+        <g transform="matrix(0.48,0,0,0.48,187.188,-161.949)">
+            <path d="M119.064,472.441L144.387,472.441" style="fill:none;stroke:white;stroke-width:6px;"/>
         </g>
-        <path d="M119.064,472.441L144.387,472.441" style="fill:none;stroke:white;stroke-width:2.08px;"/>
     </g>
 </svg>
