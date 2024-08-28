@@ -1,1 +1,12 @@
 node_modules
+README.md
+
+## special assets
+assets/spielzettel.pdf
+assets/spielzettel.png
+
+## development stuff
+index.ts
+server.ts
+tsconfig.json
+package.json

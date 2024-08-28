@@ -33,5 +33,4 @@ Dank Docker kann die Webseite einfach darüber ausgeliefert werden.
 
 ## ToDo
 
-- [ ] Am Ende müssen die Gitterlinien über den Schiffen nochmal erneuert werden, wo ein Schiff drunter ist, muss die Linie weiß sein, um möglichst viel Kontrast zu bieten. -> Vielleicht besser in den Grafiken direkt erledigen
-
+- Gitterlinien verbessern; von Stroke auf Rectangle wechseln...
